@@ -54,8 +54,8 @@ async function cargarDeudas() {
         ${
           deuda.fechaVencimiento
             ? `Vencimiento: ${deuda.fechaVencimiento}`
-            : deuda.fechaLimite
-              ? `Fecha límite: ${deuda.fechaLimite}`
+            : deuda.fechaLimitePago
+              ? `Fecha límite: ${deuda.fechaLimitePago}`
               : deuda.fechaPago
                 ? `Pagada el: ${deuda.fechaPago}`
                 : ''
@@ -69,7 +69,7 @@ async function cargarDeudas() {
 }
 cargarDeudas();
 
-// --- Modal Agregar Deuda (NUEVO) ---
+// --- Modal Agregar Deuda ---
 const modal = document.getElementById("modal-deuda");
 const openBtn = document.getElementById("add-deuda-btn");
 const closeBtn = document.getElementById("close-modal-deuda");
@@ -98,14 +98,22 @@ function actualizarCamposModal() {
     fechaLimiteWrapper.classList.remove('hide');
     recurrenteWrapper.classList.remove('hide');
     if (recurrente === "true") frecuenciaWrapper.classList.remove('hide');
-  } else if (estado === "PAGADA") {
+  }
+  else if (estado === "PAGADA") {
     fechaPagoWrapper.classList.remove('hide');
     recurrenteWrapper.classList.remove('hide');
-    if (recurrente === "true") frecuenciaWrapper.classList.remove('hide');
-  } else if (estado === "VENCIDA") {
+    if (recurrente === "true") {
+      frecuenciaWrapper.classList.remove('hide');
+      fechaLimiteWrapper.classList.remove('hide'); // Mostrar fecha límite para recurrente
+    }
+  }
+  else if (estado === "VENCIDA") {
     fechaVencimientoWrapper.classList.remove('hide');
     recurrenteWrapper.classList.remove('hide');
-    if (recurrente === "true") frecuenciaWrapper.classList.remove('hide');
+    if (recurrente === "true") {
+      frecuenciaWrapper.classList.remove('hide');
+      fechaLimiteWrapper.classList.remove('hide'); // Mostrar fecha límite para recurrente
+    }
   }
 }
 
@@ -137,12 +145,11 @@ window.addEventListener("keydown", function(e){
   if (e.key === "Escape" && modal.classList.contains("active")) closeBtn.onclick();
 });
 
-// --- Cargar categorías solo del usuario autenticado (CORREGIDO) ---
+// --- Cargar categorías solo del usuario autenticado ---
 async function cargarCategoriasDeuda() {
   const select = document.getElementById("deuda-categoria");
   select.innerHTML = "<option value=''>Cargando...</option>";
   try {
-    // Aquí la URL correcta (NO se envía userId en la URL)
     const res = await fetch(`${API_BASE}/admin/categorias-deuda`, {
       headers: { Authorization: `Bearer ${token}` }
     });
@@ -171,7 +178,7 @@ document.getElementById("btn-nueva-categoria").onclick = async function () {
         "Content-Type": "application/json",
         "Authorization": "Bearer " + token
       },
-      body: JSON.stringify({ nombre }) // Solo el nombre
+      body: JSON.stringify({ nombre })
     });
     if (!res.ok) throw new Error();
     alert("¡Categoría creada!");
@@ -181,7 +188,7 @@ document.getElementById("btn-nueva-categoria").onclick = async function () {
   }
 };
 
-// --- Guardar nueva deuda (puedes adaptar este flujo a tu backend real) ---
+// --- Guardar nueva deuda (con validación de fechas) ---
 document.getElementById("deuda-form").onsubmit = async function (e) {
   e.preventDefault();
   const errorDiv = document.getElementById("deuda-error-msg");
@@ -207,12 +214,20 @@ document.getElementById("deuda-form").onsubmit = async function (e) {
     return;
   }
 
-  // Flujos:
+  // Validar fechas según estado (Evita guardar con fechas ilógicas)
+  const today = new Date().toISOString().slice(0,10);
+
   if (estado === "PENDIENTE") {
-    body.fechaLimite = document.getElementById("deuda-fecha-limite").value || null;
+    body.fechaLimitePago = document.getElementById("deuda-fecha-limite").value || null;
     body.recurrente = recurrente === "true";
-    if (!body.fechaLimite) {
+    if (!body.fechaLimitePago) {
       errorDiv.textContent = "La fecha límite de pago es obligatoria.";
+      errorDiv.style.display = "block";
+      return;
+    }
+    // La fecha límite no puede ser antes de hoy
+    if (body.fechaLimitePago < today) {
+      errorDiv.textContent = "La fecha límite de pago no puede ser anterior a hoy.";
       errorDiv.style.display = "block";
       return;
     }
@@ -233,7 +248,19 @@ document.getElementById("deuda-form").onsubmit = async function (e) {
       errorDiv.style.display = "block";
       return;
     }
+    // Fecha de pago NO puede ser después de hoy
+    if (body.fechaPago > today) {
+      errorDiv.textContent = "La fecha de pago no puede ser posterior a hoy.";
+      errorDiv.style.display = "block";
+      return;
+    }
     if (recurrente === "true") {
+      body.fechaLimitePago = document.getElementById("deuda-fecha-limite").value || null;
+      if (!body.fechaLimitePago) {
+        errorDiv.textContent = "La fecha límite de pago es obligatoria para deudas pagadas recurrentes.";
+        errorDiv.style.display = "block";
+        return;
+      }
       body.frecuencia = document.getElementById("deuda-frecuencia").value || null;
       if (!body.frecuencia) {
         errorDiv.textContent = "Completa la frecuencia de deuda.";
@@ -250,7 +277,19 @@ document.getElementById("deuda-form").onsubmit = async function (e) {
       errorDiv.style.display = "block";
       return;
     }
+    // Fecha de vencimiento NO puede ser después de hoy
+    if (body.fechaVencimiento > today) {
+      errorDiv.textContent = "La fecha de vencimiento no puede ser posterior a hoy.";
+      errorDiv.style.display = "block";
+      return;
+    }
     if (recurrente === "true") {
+      body.fechaLimitePago = document.getElementById("deuda-fecha-limite").value || null;
+      if (!body.fechaLimitePago) {
+        errorDiv.textContent = "La fecha límite de pago es obligatoria para deudas vencidas recurrentes.";
+        errorDiv.style.display = "block";
+        return;
+      }
       body.frecuencia = document.getElementById("deuda-frecuencia").value || null;
       if (!body.frecuencia) {
         errorDiv.textContent = "Completa la frecuencia de deuda.";
