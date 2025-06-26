@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Dashboard | Gestión de Deudas</title>
+  <link rel="stylesheet" href="css/style.css"/>
+</head>
+<body>
+    <div class="dashboard-container">
+        <header>
+            <h2>Bienvenido, <span id="user-name"></span></h2>
+            <button id="logout-btn">Cerrar sesión</button>
+        </header>
+        <section>
+            <h3>Mis Deudas</h3>
+            <div id="deudas-list"></div>
+            <button id="add-deuda-btn">Agregar nueva deuda</button>
+        </section>
+        <section>
+            <h3>Mis Pagos</h3>
+            <div id="pagos-list"></div>
+        </section>
+        <section>
+            <h3>Mis Alertas</h3>
+            <div id="alertas-list"></div>
+        </section>
+        <section>
+            <h3>Mi Perfil</h3>
+            <div id="perfil-info"></div>
+        </section>
+    </div>
+
+    <!-- MODAL: Agregar nueva deuda -->
+    <div id="modal-deuda" class="modal">
+      <div class="modal-content">
+        <button type="button" class="close" id="close-modal-deuda" title="Cerrar">&times;</button>
+        <h2>Agregar nueva deuda</h2>
+        <form id="deuda-form" autocomplete="off">
+          <div class="form-group">
+            <label for="deuda-nombre">Nombre de la deuda:</label>
+            <input type="text" id="deuda-nombre" class="input-field" required>
+          </div>
+          <div class="form-group">
+            <label for="deuda-categoria">Categoría:</label>
+            <div id="deuda-categoria-wrapper" style="display:flex; align-items:center;">
+              <select id="deuda-categoria" class="input-field" required></select>
+              <button type="button" id="btn-nueva-categoria" class="mini-btn" title="Agregar categoría">+</button>
+            </div>
+          </div>
+          <div class="form-group">
+            <label for="deuda-descripcion">Descripción:</label>
+            <input type="text" id="deuda-descripcion" class="input-field">
+          </div>
+          <div class="form-group">
+            <label for="deuda-monto">Monto:</label>
+            <input type="number" id="deuda-monto" class="input-field" min="0.01" step="0.01" required>
+          </div>
+          <div class="form-group">
+            <label for="deuda-estado">Estado de Deuda:</label>
+            <select id="deuda-estado" class="input-field" required>
+              <option value="">Seleccionar</option>
+              <option value="PENDIENTE">Pendiente</option>
+              <option value="PAGADA">Pagada</option>
+              <option value="VENCIDA">Vencida</option>
+            </select>
+          </div>
+
+          <!-- Campos condicionales -->
+          <div class="form-group hide" id="fecha-limite-wrapper">
+            <label for="deuda-fecha-limite">Fecha límite de pago:</label>
+            <input type="date" id="deuda-fecha-limite" class="input-field">
+          </div>
+          <div class="form-group hide" id="fecha-pago-wrapper">
+            <label for="deuda-fecha-pago">Fecha de pago:</label>
+            <input type="date" id="deuda-fecha-pago" class="input-field">
+          </div>
+          <div class="form-group hide" id="fecha-vencimiento-wrapper">
+            <label for="deuda-fecha-vencimiento">Fecha de vencimiento:</label>
+            <input type="date" id="deuda-fecha-vencimiento" class="input-field">
+          </div>
+          <div class="form-group hide" id="recurrente-wrapper">
+            <label for="deuda-recurrente">¿Es recurrente?</label>
+            <select id="deuda-recurrente" class="input-field">
+              <option value="">Seleccionar</option>
+              <option value="true">Sí</option>
+              <option value="false">No</option>
+            </select>
+          </div>
+          <div class="form-group hide" id="frecuencia-wrapper">
+            <label for="deuda-frecuencia">Frecuencia de deuda:</label>
+            <select id="deuda-frecuencia" class="input-field">
+              <option value="">Seleccionar</option>
+              <option value="MENSUAL">Mensual</option>
+              <option value="TRIMESTRAL">Trimestral</option>
+            </select>
+          </div>
+
+          <div class="form-footer">
+            <div id="deuda-error-msg" class="error-msg" style="display:none;"></div>
+            <button type="submit" class="register-btn">Guardar deuda</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <script src="js/dashboard.js"></script>
+</body>
+</html>
