@@ -14,6 +14,14 @@
         </header>
         <section>
           <h3>Mis Deudas</h3>
+
+          <!-- NAVEGACIÓN DE MESES -->
+          <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 1.2rem;">
+            <button id="mes-anterior" class="mini-btn" title="Mes anterior">&larr;</button>
+            <span id="mes-actual" style="font-size:1.05rem;font-weight:600;color:#27496d;"></span>
+            <button id="mes-siguiente" class="mini-btn" title="Mes siguiente">&rarr;</button>
+          </div>
+
           <!-- Filtros DEUDAS -->
           <form class="deudas-filtros" id="filtros-form" autocomplete="off">
             <select id="filtro-estado" class="input-field filtro-item">
@@ -52,7 +60,7 @@
         </section>
         <section>
           <h3>Mis Pagos</h3>
-          <!-- Filtros PAGOS (clase corregida para diferenciar estilos y evitar conflictos) -->
+          <!-- Filtros PAGOS -->
           <form class="pagos-filtros" id="pagos-filtros-form" autocomplete="off">
             <select id="filtro-pago-deuda" class="input-field filtro-item">
               <option value="">Deuda (todas)</option>
