@@ -13,13 +13,71 @@
             <button id="logout-btn">Cerrar sesión</button>
         </header>
         <section>
-            <h3>Mis Deudas</h3>
-            <div id="deudas-list"></div>
-            <button id="add-deuda-btn">Agregar nueva deuda</button>
+          <h3>Mis Deudas</h3>
+          <!-- Filtros DEUDAS -->
+          <form class="deudas-filtros" id="filtros-form" autocomplete="off">
+            <select id="filtro-estado" class="input-field filtro-item">
+              <option value="">Estado (todos)</option>
+              <option value="PENDIENTE">Pendiente</option>
+              <option value="PAGADA">Pagada</option>
+              <option value="VENCIDA">Vencida</option>
+            </select>
+            <select id="filtro-categoria" class="input-field filtro-item">
+              <option value="">Categoría (todas)</option>
+              <!-- Categorías dinámicas -->
+            </select>
+            <input type="text" id="filtro-busqueda" class="input-field filtro-item" placeholder="Buscar por nombre o descripción...">
+            <button type="button" id="btn-limpiar-filtros" class="mini-btn" title="Limpiar filtros">&#x2716;</button>
+          </form>
+          <div class="deudas-table-wrapper">
+            <table class="deudas-table">
+              <thead>
+                <tr>
+                  <th>Nombre</th>
+                  <th>Categoría</th>
+                  <th>Descripción</th>
+                  <th>Monto</th>
+                  <th>Estado</th>
+                  <th>Recurrente</th>
+                  <th>Frecuencia</th>
+                  <th>Fecha límite</th>
+                  <th>Fecha pago</th>
+                  <th>Fecha vencimiento</th>
+                </tr>
+              </thead>
+              <tbody id="deudas-list"></tbody>
+            </table>
+          </div>
+          <button id="add-deuda-btn">Agregar nueva deuda</button>
         </section>
         <section>
-            <h3>Mis Pagos</h3>
-            <div id="pagos-list"></div>
+          <h3>Mis Pagos</h3>
+          <!-- Filtros PAGOS (clase corregida para diferenciar estilos y evitar conflictos) -->
+          <form class="pagos-filtros" id="pagos-filtros-form" autocomplete="off">
+            <select id="filtro-pago-deuda" class="input-field filtro-item">
+              <option value="">Deuda (todas)</option>
+              <!-- Opciones dinámicas -->
+            </select>
+            <input type="date" id="filtro-pago-desde" class="input-field filtro-item" placeholder="Desde">
+            <input type="date" id="filtro-pago-hasta" class="input-field filtro-item" placeholder="Hasta">
+            <input type="text" id="filtro-pago-nota" class="input-field filtro-item" placeholder="Buscar en notas...">
+            <button type="button" id="btn-limpiar-filtros-pago" class="mini-btn" title="Limpiar filtros">&#x2716;</button>
+          </form>
+          <div class="pagos-table-wrapper">
+            <table class="deudas-table">
+              <thead>
+                <tr>
+                  <th>Deuda</th>
+                  <th>Monto pagado</th>
+                  <th>Fecha de pago</th>
+                  <th>Notas</th>
+                  <th>Comprobante</th>
+                </tr>
+              </thead>
+              <tbody id="pagos-list"></tbody>
+            </table>
+          </div>
+          <button id="add-pago-btn" style="margin-bottom: 1.1rem;">Registrar nuevo pago</button>
         </section>
         <section>
             <h3>Mis Alertas</h3>
@@ -65,7 +123,6 @@
               <option value="VENCIDA">Vencida</option>
             </select>
           </div>
-
           <!-- Campos condicionales -->
           <div class="form-group hide" id="fecha-limite-wrapper">
             <label for="deuda-fecha-limite">Fecha límite de pago:</label>
@@ -95,10 +152,43 @@
               <option value="TRIMESTRAL">Trimestral</option>
             </select>
           </div>
-
           <div class="form-footer">
             <div id="deuda-error-msg" class="error-msg" style="display:none;"></div>
             <button type="submit" class="register-btn">Guardar deuda</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- MODAL: Registrar nuevo pago -->
+    <div id="modal-pago" class="modal">
+      <div class="modal-content">
+        <button type="button" class="close" id="close-modal-pago" title="Cerrar">&times;</button>
+        <h2>Registrar nuevo pago</h2>
+        <form id="pago-form" autocomplete="off" enctype="multipart/form-data">
+          <div class="form-group">
+            <label for="pago-deuda">Deuda:</label>
+            <select id="pago-deuda" class="input-field" required></select>
+          </div>
+          <div class="form-group">
+            <label for="pago-monto">Monto pagado:</label>
+            <input type="number" id="pago-monto" class="input-field" min="0.01" step="0.01" required readonly>
+          </div>
+          <div class="form-group">
+            <label for="pago-fecha">Fecha de pago:</label>
+            <input type="date" id="pago-fecha" class="input-field" required>
+          </div>
+          <div class="form-group">
+            <label for="pago-notas">Notas:</label>
+            <input type="text" id="pago-notas" class="input-field" maxlength="500">
+          </div>
+          <div class="form-group">
+            <label for="pago-comprobante">Comprobante (imagen o PDF):</label>
+            <input type="file" id="pago-comprobante" class="input-field" accept="image/*,.pdf" required>
+          </div>
+          <div class="form-footer">
+            <div id="pago-error-msg" class="error-msg" style="display:none;"></div>
+            <button type="submit" class="register-btn">Registrar pago</button>
           </div>
         </form>
       </div>
