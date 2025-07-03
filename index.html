@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Login | RememberDebts</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <div class="login-container">
+        <div class="login-title">Iniciar sesión</div>
+        <form class="login-form" id="login-form">
+            <input type="text" id="email" class="input-field" placeholder="Correo" required autocomplete="email">
+            <input type="password" id="password" class="input-field" placeholder="Contraseña" required autocomplete="current-password">
+            <button type="submit" class="login-btn">Entrar</button>
+            <div id="error-msg" class="error-msg">Usuario o contraseña incorrectos.</div>
+        </form>
+        <div class="register-link">
+            ¿No tienes cuenta?
+            <a href="register.html">Regístrate aquí</a>
+        </div>
+    </div>
+    <script src="js/auth.js"></script>
+</body>
+</html>

@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Registro | RememberDebts</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <div class="register-container">
+    <div class="register-title">Crear cuenta</div>
+    <form class="register-form" id="register-form">
+      <input type="text" id="firstName" class="input-field" placeholder="Nombre" required maxlength="50" autocomplete="given-name">
+      <input type="text" id="lastName" class="input-field" placeholder="Apellido" required maxlength="50" autocomplete="family-name">
+      <input type="tel" id="userTelefono" class="input-field" placeholder="Teléfono (+51...)" pattern="^\+?[0-9]{7,15}$" required autocomplete="tel">
+      <input type="email" id="userEmail" class="input-field" placeholder="Correo electrónico" required autocomplete="email">
+      <input type="password" id="userPassword" class="input-field" placeholder="Contraseña" minlength="8" maxlength="20" required autocomplete="new-password">
+      <input type="password" id="confirmPassword" class="input-field" placeholder="Repetir contraseña" minlength="8" maxlength="20" required autocomplete="new-password">
+      <button type="submit" class="register-btn">Registrarme</button>
+      <div id="register-error-msg" class="error-msg">Ocurrió un error. Intenta de nuevo.</div>
+    </form>
+    <div class="login-link">
+      ¿Ya tienes cuenta?
+      <a href="index.html">Inicia sesión aquí</a>
+    </div>
+  </div>
+  <script src="js/auth.js"></script>
+</body>
+</html>
