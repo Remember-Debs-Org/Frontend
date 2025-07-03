@@ -1,4 +1,4 @@
-const API_BASE = "http://localhost:8080/api/v1/auth";
+const API_BASE = "https://rememberdebts-api.onrender.com/api/v1/auth";
 
 // --- LOGIN ---
 const loginForm = document.getElementById("login-form");

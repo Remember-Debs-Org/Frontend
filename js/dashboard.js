@@ -27,13 +27,35 @@ document.getElementById('logout-btn').onclick = () => {
   window.location.href = "index.html";
 };
 
-const API_BASE = "http://localhost:8080/api/v1";
+// URL API REMOTA
+const API_BASE = "https://rememberdebts-api.onrender.com/api/v1";
 
 // --- Estado global ---
 let todasLasDeudas = [];
 let categoriasSet = new Set();
 let todosLosPagos = [];
 let deudasParaPagosFiltro = [];
+
+// ----------- NAVEGACIÓN DE MESES -----------
+let mesSeleccionado = new Date();
+function mostrarMesSeleccionado() {
+  const span = document.getElementById("mes-actual");
+  span.textContent = mesSeleccionado.toLocaleString("es-PE", {month:"long", year:"numeric"});
+}
+document.addEventListener("DOMContentLoaded", () => {
+  mostrarMesSeleccionado();
+});
+
+document.getElementById("mes-anterior").onclick = function() {
+  mesSeleccionado.setMonth(mesSeleccionado.getMonth() - 1);
+  mostrarMesSeleccionado();
+  mostrarDeudasFiltradas();
+};
+document.getElementById("mes-siguiente").onclick = function() {
+  mesSeleccionado.setMonth(mesSeleccionado.getMonth() + 1);
+  mostrarMesSeleccionado();
+  mostrarDeudasFiltradas();
+};
 
 // --- Cargar deudas (guardar todas para filtrado rápido) ---
 async function cargarDeudas() {
@@ -71,7 +93,7 @@ function actualizarOpcionesFiltroCategorias() {
   select.value = actual; // mantén selección
 }
 
-// --- Filtrado de deudas (Estado, Categoría, Búsqueda) ---
+// --- Filtrado de deudas (Estado, Categoría, Búsqueda y Mes) ---
 function mostrarDeudasFiltradas() {
   const estado = document.getElementById("filtro-estado").value;
   const categoria = document.getElementById("filtro-categoria").value;
@@ -79,49 +101,32 @@ function mostrarDeudasFiltradas() {
   const tbody = document.getElementById("deudas-list");
   let deudasFiltradas = [...todasLasDeudas];
 
-  // FILTRO POR DEFECTO: solo si no hay filtros activos
-  const hayFiltros = estado || categoria || texto;
-  if (!hayFiltros) {
-    const hoy = new Date();
-    const mesActual = hoy.getMonth();
-    const anioActual = hoy.getFullYear();
+  // --- Filtro por mes seleccionado (si hay navegación)
+  const mes = mesSeleccionado.getMonth();
+  const anio = mesSeleccionado.getFullYear();
 
-    // Deudas del mes actual
-    const deudasMesActual = deudasFiltradas.filter(d => {
-      // Considera fechaLimitePago como referencia para pendientes, vencidas; fechaPago para pagadas
-      let fechaReferencia = d.fechaLimitePago || d.fechaVencimiento || d.fechaPago;
-      if (!fechaReferencia) return false;
-      let fecha = new Date(fechaReferencia);
-      return fecha.getMonth() === mesActual && fecha.getFullYear() === anioActual;
-    });
+  deudasFiltradas = deudasFiltradas.filter(d => {
+    // Referencia: fechaLimitePago, fechaVencimiento, fechaPago
+    let fechaReferencia = d.fechaLimitePago || d.fechaVencimiento || d.fechaPago;
+    if (!fechaReferencia) return false;
+    let fecha = new Date(fechaReferencia);
+    return fecha.getMonth() === mes && fecha.getFullYear() === anio;
+  });
 
-    // Deudas anteriores NO PAGADAS (pendientes o vencidas, solo de meses anteriores)
-    const deudasNoPagadasAnt = deudasFiltradas.filter(d => {
-      // Excluye las ya del mes actual
-      let fechaReferencia = d.fechaLimitePago || d.fechaVencimiento || d.fechaPago;
-      if (!fechaReferencia) return false;
-      let fecha = new Date(fechaReferencia);
-      // Solo meses anteriores
-      const esAnterior = fecha.getFullYear() < anioActual ||
-                         (fecha.getFullYear() === anioActual && fecha.getMonth() < mesActual);
-      // Solo pendientes o vencidas
-      const esNoPagada = d.estado === "PENDIENTE" || d.estado === "VENCIDA";
-      return esAnterior && esNoPagada;
-    });
-
-    // Ordena: primero mes actual, luego no pagadas anteriores
-    deudasFiltradas = [...deudasMesActual, ...deudasNoPagadasAnt];
-  } else {
-    // Aplica filtros si están activos
-    if (estado) deudasFiltradas = deudasFiltradas.filter(d => d.estado === estado);
-    if (categoria) deudasFiltradas = deudasFiltradas.filter(d => d.categoriaNombre === categoria);
-    if (texto) {
-      deudasFiltradas = deudasFiltradas.filter(d =>
-        (d.nombre && d.nombre.toLowerCase().includes(texto)) ||
-        (d.descripcion && d.descripcion.toLowerCase().includes(texto))
-      );
-    }
+  // --- Aplica filtros de estado/categoría/búsqueda
+  if (estado) deudasFiltradas = deudasFiltradas.filter(d => d.estado === estado);
+  if (categoria) deudasFiltradas = deudasFiltradas.filter(d => d.categoriaNombre === categoria);
+  if (texto) {
+    deudasFiltradas = deudasFiltradas.filter(d =>
+      (d.nombre && d.nombre.toLowerCase().includes(texto)) ||
+      (d.descripcion && d.descripcion.toLowerCase().includes(texto))
+    );
   }
+
+  // --- Ordena: pagadas al final ---
+  let deudasPagadas = deudasFiltradas.filter(d => d.estado === "PAGADA");
+  let deudasNoPagadas = deudasFiltradas.filter(d => d.estado !== "PAGADA");
+  deudasFiltradas = [...deudasNoPagadas, ...deudasPagadas];
 
   tbody.innerHTML = "";
   if (!deudasFiltradas || deudasFiltradas.length === 0) {
@@ -135,9 +140,9 @@ function mostrarDeudasFiltradas() {
     const fecha = new Date(fechaISO);
     const hoy = new Date();
     const inicioSemana = new Date(hoy);
-    inicioSemana.setDate(hoy.getDate() - hoy.getDay()); // domingo
+    inicioSemana.setDate(hoy.getDate() - hoy.getDay());
     const finSemana = new Date(hoy);
-    finSemana.setDate(hoy.getDate() + (6 - hoy.getDay())); // sábado
+    finSemana.setDate(hoy.getDate() + (6 - hoy.getDay()));
     inicioSemana.setHours(0,0,0,0);
     finSemana.setHours(23,59,59,999);
     return fecha >= inicioSemana && fecha <= finSemana;
@@ -145,13 +150,9 @@ function mostrarDeudasFiltradas() {
 
   deudasFiltradas.forEach(deuda => {
     let tr = document.createElement("tr");
-
-    // ROJO: vencida y no pagada
     if (deuda.estado === "VENCIDA" && (!deuda.fechaPago || deuda.fechaPago === "")) {
       tr.classList.add("deuda-vencida-roja");
-    }
-    // AMARILLO: pendiente y por vencer esta semana
-    else if (deuda.estado === "PENDIENTE" && esEstaSemana(deuda.fechaLimitePago)) {
+    } else if (deuda.estado === "PENDIENTE" && esEstaSemana(deuda.fechaLimitePago)) {
       tr.classList.add("deuda-pendiente-amarilla");
     }
     tr.innerHTML = `
@@ -170,8 +171,7 @@ function mostrarDeudasFiltradas() {
   });
 }
 
-
-// Listeners filtros
+// Listeners filtros y navegación
 document.addEventListener("DOMContentLoaded", function() {
   ["filtro-estado", "filtro-categoria", "filtro-busqueda"].forEach(id => {
     document.getElementById(id).addEventListener("input", mostrarDeudasFiltradas);
@@ -544,7 +544,6 @@ window.addEventListener("keydown", e => {
 });
 
 // --- Registrar nuevo pago ---
-// --- ¡MODIFICADO AQUÍ! ---
 pagoForm.onsubmit = async function (e) {
   e.preventDefault();
   pagoErrorMsg.style.display = "none";
